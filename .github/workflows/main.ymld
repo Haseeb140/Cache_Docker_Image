@@ -1,0 +1,31 @@
+name: Docker Load
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker_load:
+    runs-on: ubuntu-latest
+    steps:
+        - uses: actions/checkout@v3
+
+        - run: mkdir -p ~/image-cache
+
+        - id: image-cache
+          uses: actions/cache@v3
+          with:
+              path: ~/image-cache
+              key: image-cache-${{ runner.os }}
+
+        - if: steps.image-cache.outputs.cache-hit != 'true'
+          run: |
+              docker pull nginx:latest
+              docker save -o ~/image-cache/nginx.tar alpine
+
+        - if: steps.image-cache.outputs.cache-hit == 'true'
+          run: docker load -i ~/image-cache/postgres.tar
+
+        - name: Check Images
+          run: docker images

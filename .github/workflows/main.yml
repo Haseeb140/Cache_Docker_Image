@@ -25,7 +25,7 @@ jobs:
               docker save -o ~/image-cache/nginx.tar alpine
 
         - if: steps.image-cache.outputs.cache-hit == 'true'
-          run: docker load -i ~/image-cache/postgres.tar
+          run: docker load -i ~/image-cache/nginx.tar
 
         - name: Check Images
           run: docker images

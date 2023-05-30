@@ -1,0 +1,33 @@
+name: Docker Load
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker_load:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Check Docker image cache
+        id: check_cache
+        run: |
+          if [ -z "$(docker images -q nginx)" ]; then
+            echo "::set-output name=cache_hit::false"
+          else
+            echo "::set-output name=cache_hit::true"
+          fi
+      
+      - name: Pull and save Docker image
+        if: steps.check_cache.outputs.cache_hit != 'true'
+        run: |
+          docker pull nginx
+          docker save -o nginx.tar nginx
+      
+      - name: Load Docker image from cache or tar file
+        run: |
+          docker load -i nginx.tar
